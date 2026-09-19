@@ -1,4 +1,3 @@
-// Report page: submit a problem, then show where Freshdesk routed it.
 import { $, api, busy, deptBadge, el, fill, initPage, priorityBadge, statusBadge, toast } from "/static/common.js";
 
 const SAMPLES = [
@@ -14,7 +13,6 @@ const SAMPLES = [
 
 const form = $("report-form");
 
-// ------------------------------------------------------------ helpers
 function useSample(sample) {
   for (const [name, value] of Object.entries(sample)) form.elements[name].value = value;
   if (!form.elements.name.value) form.elements.name.value = "Lwin";
@@ -33,8 +31,6 @@ function clearErrors() {
   }
 }
 
-// Pydantic's own messages ("String should have at least 5 characters") are
-// written for programmers. These are the ones a student sees instead.
 const FRIENDLY = {
   name: "Please enter your name.",
   email: "Please enter a valid email address, e.g. name@university.edu.",
@@ -43,9 +39,6 @@ const FRIENDLY = {
   description: "Describe the problem in a sentence or two (at least 10 characters).",
 };
 
-// FastAPI answers a bad form with 422 and a list like
-// [{"loc": ["body", "email"], "msg": "value is not a valid email address"}].
-// Put a message under each field that has a problem.
 function showErrors(detail) {
   clearErrors();
   for (const problem of detail) {
@@ -58,10 +51,7 @@ function showErrors(detail) {
   form.querySelector(".invalid input, .invalid textarea")?.focus();
 }
 
-// ------------------------------------------------------ confirmation
 function showConfirmation(result, email) {
-  // Remember the report for the Track page. The email stays in this
-  // browser: it is never put in a URL, where it would end up in logs.
   try { localStorage.setItem("campusdesk:last", JSON.stringify({ id: result.ticket_id, email })); } catch {}
 
   const speed = result.routed_in_ms < 100 ? "instantly"
@@ -78,7 +68,7 @@ function showConfirmation(result, email) {
       el("div", { class: "fact" }, el("div", { class: "label" }, "Status"), statusBadge(result.status)),
     ),
     result.priority === "Urgent"
-      ? el("div", { class: "callout", style: "margin-bottom:16px" }, "⚠️",
+      ? el("div", { class: "callout", style: "margin-bottom:16px" },
           el("span", {}, "Marked urgent: the team must fix this within one hour."))
       : null,
     el("div", { class: "actions" },
@@ -98,7 +88,6 @@ function reset() {
   form.elements.name.focus();
 }
 
-// -------------------------------------------------------------- events
 document.querySelectorAll("[data-sample]").forEach((chip) =>
   chip.addEventListener("click", () => useSample(SAMPLES[chip.dataset.sample])));
 

@@ -1,4 +1,3 @@
-"""The Freshdesk setup and tunnel scripts: payloads, no network."""
 from app import categories
 from scripts.setup_freshdesk import (creation_rules, escalation_rule, sla_policy,
                                      webhook_action, webhook_rule)

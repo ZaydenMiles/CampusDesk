@@ -1,4 +1,3 @@
-"""One logging setup for the API and every script."""
 import logging
 
 from app import config

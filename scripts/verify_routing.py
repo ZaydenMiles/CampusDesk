@@ -1,14 +1,3 @@
-"""Prove the categorisation works: submit sample reports, check each one.
-
-    python -m scripts.verify_routing                 # all samples, check routing
-    python -m scripts.verify_routing --limit 4
-    python -m scripts.verify_routing --create-only   # rules OFF: the "before"
-
-For every report in data/samples.json it creates a real Freshdesk ticket
-through the API (with no category), waits for the automation rules, then
-compares type, group, priority and status with what app/categories.py
-predicts. Exit code 1 if anything was routed wrongly.
-"""
 import argparse
 import json
 import sys

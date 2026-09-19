@@ -1,23 +1,3 @@
-"""CampusDesk — the code side of the Freshdesk demo.
-
-    uvicorn app.main:app --reload --port 8000                 (real Freshdesk)
-    DEMO_MODE=1 uvicorn app.main:app --reload --port 8000     (no account needed)
-
-    GET  /                       student portal: report a problem
-    GET  /track                  student portal: follow a report's progress
-    GET  /dashboard              staff overview: by department, status, SLA
-    GET  /static/...             shared CSS and JavaScript for the pages
-    POST /api/reports            create a Freshdesk ticket (no category!)
-    POST /api/reports/{id}/track track one ticket (email must match)
-    GET  /api/dashboard          the numbers behind /dashboard
-    GET  /api/mode               demo or real Freshdesk?
-    POST /webhooks/freshdesk     Freshdesk tells us a status changed
-    POST /api/demo/reports/{id}/advance   demo only: play the agent
-    GET  /health                 can we reach Freshdesk and our database?
-
-The portal never decides a category. It hands the raw report to Freshdesk,
-waits for the automation rules to route it, and reports back what they did.
-"""
 import hmac
 import time
 from collections import Counter
@@ -47,7 +27,6 @@ def create_app(client: FreshdeskClient | None = None,
                   version="1.1.0")
 
     if demo and client is None:
-        # A pretend helpdesk in memory, pre-filled with the 12 sample reports.
         client, store = DemoFreshdesk(), store or EventStore(":memory:")
         client.seed(store)
         log.info("DEMO MODE: pretend Freshdesk in memory, nothing leaves this laptop")
@@ -57,7 +36,7 @@ def create_app(client: FreshdeskClient | None = None,
     def fd() -> FreshdeskClient:
         if state["client"] is None:
             try:
-                state["client"] = from_env()  # created lazily: tests inject a fake
+                state["client"] = from_env()
             except ValueError:
                 raise HTTPException(503, "Freshdesk is not configured. Fill in .env, "
                                          "or try it without an account: make demo")
@@ -69,7 +48,6 @@ def create_app(client: FreshdeskClient | None = None,
         return state["store"]
 
     def names(fdc: FreshdeskClient, ticket: dict) -> dict:
-        """Turn Freshdesk's numeric ids into words a student understands."""
         return {
             "status": fdc.statuses().get(ticket["status"], str(ticket["status"])),
             "priority": config.PRIORITY.get(ticket["priority"], str(ticket["priority"])),
@@ -77,7 +55,6 @@ def create_app(client: FreshdeskClient | None = None,
             "category": ticket.get("type"),
         }
 
-    # ---------------------------------------------------------------- pages
     @app.get("/", include_in_schema=False)
     def portal_page():
         return FileResponse(STATIC / "index.html")
@@ -90,19 +67,17 @@ def create_app(client: FreshdeskClient | None = None,
     def dashboard_page():
         return FileResponse(STATIC / "dashboard.html")
 
-    # ------------------------------------------------------------ operations
     @app.get("/health", response_model=Health)
     def health():
         try:
             fd().me()
             fd_ok = True
-        except Exception as exc:                       # noqa: BLE001
+        except Exception as exc:
             log.warning("health: freshdesk unreachable (%s)", exc)
             fd_ok = False
         db_ok = events().healthy()
         return Health(ok=fd_ok and db_ok, freshdesk=fd_ok, events_db=db_ok)
 
-    # ------------------------------------------------------------- reports
     @app.post("/api/reports", status_code=201, response_model=ReportAccepted)
     def submit_report(report: ReportIn, fdc: FreshdeskClient = Depends(fd),
                       store: EventStore = Depends(events)):
@@ -134,8 +109,6 @@ def create_app(client: FreshdeskClient | None = None,
     def track_report(ticket_id: int, body: TrackIn,
                      fdc: FreshdeskClient = Depends(fd),
                      store: EventStore = Depends(events)):
-        # POST with the email in the body, not GET ?email=...: URLs end up in
-        # browser history and server logs, and an email address is personal data.
         email = body.email
         try:
             ticket = fdc.get_ticket(ticket_id)
@@ -144,8 +117,6 @@ def create_app(client: FreshdeskClient | None = None,
                 raise HTTPException(404, "No report with that number and email.")
             raise HTTPException(502, "The service desk is unavailable.")
         requester = (ticket.get("requester") or {}).get("email") or ""
-        # Same 404 for "wrong email" as for "no such ticket": the tracker must
-        # not tell a stranger that ticket 1234 exists.
         if requester.lower() != email.strip().lower():
             raise HTTPException(404, "No report with that number and email.")
         n = names(fdc, ticket)
@@ -199,13 +170,10 @@ def create_app(client: FreshdeskClient | None = None,
             } for t in tickets[:15]],
         }
 
-    # ------------------------------------------------------------ webhooks
     @app.post("/webhooks/freshdesk", status_code=204)
     def freshdesk_webhook(event: WebhookIn,
                           x_webhook_secret: str = Header(default=""),
                           store: EventStore = Depends(events)):
-        # This URL is public (it has to be, for Freshdesk to reach it), so
-        # anyone could post to it. The shared secret is what makes it ours.
         if not config.WEBHOOK_SECRET or not hmac.compare_digest(
                 x_webhook_secret, config.WEBHOOK_SECRET):
             raise HTTPException(401, "bad webhook secret")
@@ -214,7 +182,6 @@ def create_app(client: FreshdeskClient | None = None,
         log.info("webhook #%s -> %s (%s)", event.ticket_id, event.status,
                  event.agent or "no agent")
 
-    # ----------------------------------------------------------------- mode
     @app.get("/api/mode")
     def mode():
         return {"demo": demo,
@@ -225,9 +192,6 @@ def create_app(client: FreshdeskClient | None = None,
         @app.post("/api/demo/reports/{ticket_id}/advance")
         def demo_advance(ticket_id: int, fdc: DemoFreshdesk = Depends(fd),
                          store: EventStore = Depends(events)):
-            """Play the department agent: one click moves the ticket one step.
-            In real mode an agent does this in Freshdesk and a webhook arrives;
-            here we record the same timeline event directly."""
             try:
                 status = fdc.advance(ticket_id)
             except FreshdeskError:

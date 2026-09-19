@@ -1,10 +1,3 @@
-"""Print the Freshdesk automation rules exactly as you should type them.
-
-    python -m scripts.print_rules
-
-Admin -> Workflows -> Automations -> Ticket Creation. Create the rules in
-the order printed; the order matters (see app/categories.py).
-"""
 from app import categories as c
 
 

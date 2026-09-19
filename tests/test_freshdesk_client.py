@@ -1,4 +1,3 @@
-"""The API client, against a fake HTTP transport: no network, no API key."""
 import base64
 import json
 

@@ -1,10 +1,3 @@
-"""Shared fixtures. No test here talks to the real Freshdesk.
-
-FakeFreshdesk is the demo-mode helpdesk (app/demo.py) plus a switch to
-simulate an outage. It routes each new ticket with app.categories.classify(),
-which is what we configured Freshdesk to do. The live check against the real
-thing is scripts/verify_routing.py.
-"""
 import pytest
 from fastapi.testclient import TestClient
 

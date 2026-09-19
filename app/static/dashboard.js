@@ -1,10 +1,8 @@
-// Staff dashboard: the whole service desk at a glance, refreshed every 15 s.
 import { $, api, busy, deptBadge, el, formatTime, initPage, priorityBadge,
          relative, slug, statusBadge, toast } from "/static/common.js";
 
 let lastLoaded = null;
 
-// A list of labelled bars; each bar's width is its share of the biggest.
 function bars(id, counts, classPrefix) {
   const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
   const max = Math.max(1, ...entries.map(([, n]) => n));
@@ -21,7 +19,7 @@ function table(id, rows, columns) {
   const head = el("tr", {}, columns.map(([label]) => el("th", {}, label)));
   const body = rows.length
     ? rows.map((row) => el("tr", {}, columns.map(([, cell]) => el("td", {}, cell(row)))))
-    : [el("tr", {}, el("td", { class: "empty", colspan: columns.length }, "Nothing here. 🎉"))];
+    : [el("tr", {}, el("td", { class: "empty", colspan: columns.length }, "Nothing here."))];
   $(id).replaceChildren(el("thead", {}, head), el("tbody", {}, body));
 }
 

@@ -1,24 +1,11 @@
-"""The categorisation rules, written down once.
-
-Freshdesk does the real routing, using automation rules you type into its
-admin UI. This file is the single written source for those rules:
-
-  * scripts/print_rules.py prints exactly what to type into Freshdesk
-  * classify() predicts what Freshdesk SHOULD do with a report
-  * scripts/verify_routing.py checks that Freshdesk actually did it
-
-Freshdesk's "contains" is a plain substring match, so every keyword here was
-chosen to avoid matching inside other words ("blocked" contains "locked",
-"design in" contains "sign in"). tests/test_categories.py pins the traps down.
-"""
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class Category:
     key: str
-    ticket_type: str       # Freshdesk "Type" field
-    group: str             # Freshdesk group = the department
+    ticket_type: str
+    group: str
     keywords: tuple[str, ...]
 
 
@@ -61,10 +48,6 @@ IT = Category(
     ),
 )
 
-# Freshdesk runs ALL matching creation rules from top to bottom, so when a
-# report matches two categories the LAST matching rule's group wins.
-# IT is last because its words are the most specific: "locked out of my
-# email account" is an IT problem, not a security one.
 RULE_ORDER: tuple[Category, ...] = (MAINTENANCE, SECURITY, IT)
 
 FALLBACK_TYPE = "General"
@@ -86,8 +69,8 @@ ALL_CATEGORY_KEYWORDS: tuple[str, ...] = tuple(
 class Classification:
     ticket_type: str
     group: str
-    priority: str          # "Urgent" or "Medium"
-    routed: bool           # False = no rule matched, left for manual triage
+    priority: str
+    routed: bool
     matched: tuple[str, ...]
 
 
@@ -96,11 +79,6 @@ def _found(text: str, keywords: tuple[str, ...]) -> list[str]:
 
 
 def classify(subject: str, description: str) -> Classification:
-    """Predict what the Freshdesk rules will do with a report.
-
-    Mirrors their semantics: case-insensitive substring match, every rule
-    runs, the last matching category wins, urgency is checked separately.
-    """
     text = f"{subject}\n{description}".lower()
     ticket_type, group, routed = FALLBACK_TYPE, FALLBACK_GROUP, False
     matched: list[str] = []

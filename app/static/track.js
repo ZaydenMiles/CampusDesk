@@ -1,13 +1,11 @@
-// Track page: one report's progress, deadline and history.
 import { $, api, busy, deptBadge, el, fill, formatTime, initPage, priorityBadge,
          relative, STAGES, statusBadge, toast } from "/static/common.js";
 
 const form = $("track-form");
-let current = null;          // { id, email } of the report on screen
+let current = null;
 let demo = false;
 let refreshTimer = null;
 
-// ---------------------------------------------------------- rendering
 function stepper(status) {
   const at = STAGES.indexOf(status);
   return el("div", { class: "stepper" }, STAGES.map((stage, i) =>
@@ -41,7 +39,7 @@ function render(report) {
       statusBadge(report.status)),
     STAGES.includes(report.status) ? stepper(report.status) : null,
     report.is_escalated
-      ? el("div", { class: "callout", style: "margin-bottom:16px" }, "🚨",
+      ? el("div", { class: "callout", style: "margin-bottom:16px" },
           el("span", {}, "Escalated: this report missed its deadline and a supervisor has been alerted."))
       : null,
     el("div", { class: "facts" },
@@ -60,7 +58,6 @@ function render(report) {
   );
 }
 
-// -------------------------------------------------------------- data
 async function load({ quiet = false } = {}) {
   if (!current) return;
   try {
@@ -68,7 +65,7 @@ async function load({ quiet = false } = {}) {
       { method: "POST", body: JSON.stringify({ email: current.email }) });
     render(report);
   } catch (error) {
-    if (quiet) return;                       // a failed background refresh stays silent
+    if (quiet) return;
     $("result-card").replaceChildren(el("div", { class: "empty" }, error.message));
   }
 }
@@ -79,8 +76,6 @@ async function advance(event) {
   await load();
 }
 
-// Refresh while the tab is visible, so a status changed by staff in
-// Freshdesk (and pushed to us by webhook) appears without clicking.
 function autoRefresh() {
   clearInterval(refreshTimer);
   refreshTimer = setInterval(() => {
@@ -88,7 +83,6 @@ function autoRefresh() {
   }, 10000);
 }
 
-// -------------------------------------------------------------- events
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const id = form.elements.ticket.value.trim().replace(/^#/, "");
@@ -100,8 +94,6 @@ form.addEventListener("submit", async (event) => {
   autoRefresh();
 });
 
-// Arriving from the Report page (/track?id=42): fill in the number, and the
-// email this browser remembered. The email is never put in any URL.
 (async () => {
   demo = (await initPage()).demo;
   let saved = null;

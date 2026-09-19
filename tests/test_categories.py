@@ -1,4 +1,3 @@
-"""The keyword rules. Every trap listed here was a real misroute."""
 import json
 from pathlib import Path
 
@@ -11,21 +10,15 @@ SAMPLES = json.loads((Path(__file__).parent.parent / "data" / "samples.json").re
 
 @pytest.mark.parametrize("s", SAMPLES, ids=[s["subject"] for s in SAMPLES])
 def test_samples_match_the_rules(s):
-    """data/samples.json and app/categories.py must agree, or
-    verify_routing would be checking Freshdesk against the wrong answer."""
     c = classify(s["subject"], s["description"])
     assert (c.ticket_type, c.group, c.priority) == (
         s["expect"]["type"], s["expect"]["group"], s["expect"]["priority"])
 
 
 @pytest.mark.parametrize("text,expected_group", [
-    # "blocked" contains "locked": a blocked toilet is not a security issue
     ("The drain is blocked in the restroom", "Maintenance"),
-    # "Design Innovation" contains "sign in"
     ("Light bulb broken in the Design Innovation building, lights flicker", "Maintenance"),
-    # "locked out" of an ACCOUNT is IT, not Security: IT is the last rule
     ("I am locked out of my email", "IT Support"),
-    # keyboard is not a key
     ("Some keys on my laptop keyboard are stuck", "IT Support"),
 ])
 def test_substring_traps(text, expected_group):
@@ -37,7 +30,6 @@ def test_matching_is_case_insensitive():
 
 
 def test_last_matching_rule_wins():
-    # Maintenance (toilet) and Security (door is locked) both match.
     c = classify("Toilet door is locked", "The toilet door is locked from inside")
     assert c.group == "Security"
     assert c.priority == "Urgent"

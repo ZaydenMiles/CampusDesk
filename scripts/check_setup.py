@@ -1,11 +1,3 @@
-"""Check your Freshdesk admin setup against what the code expects.
-
-    python -m scripts.check_setup
-
-Every name the code relies on (groups, ticket types, custom statuses, the
-location field) is typed by hand in the Freshdesk UI. One typo there fails
-silently later, so this compares them now and says exactly what is missing.
-"""
 import sys
 
 from app import config

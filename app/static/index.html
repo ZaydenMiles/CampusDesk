@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>Report a problem · CampusDesk</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232f5bea'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'>C</text></svg>">
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="logo" href="/"><span class="logo-mark">🎓</span><span class="logo-text">CampusDesk</span></a>
+      <a class="logo" href="/"><span class="logo-mark">C</span><span class="logo-text">CampusDesk</span></a>
       <nav class="nav">
         <a href="/">Report a problem</a>
         <a href="/track">Track a report</a>
@@ -25,14 +25,13 @@
     </div>
 
     <div class="grid-2">
-      <!-- Left: the form, replaced by a confirmation card after submitting -->
       <section class="card" id="form-card">
         <div class="chips" aria-label="Examples">
           <span class="muted small" style="align-self:center">Try an example:</span>
-          <button type="button" class="chip" data-sample="0">🚽 Blocked toilet</button>
-          <button type="button" class="chip" data-sample="1">📶 Wi-Fi down</button>
-          <button type="button" class="chip" data-sample="2">🔒 Room locked</button>
-          <button type="button" class="chip" data-sample="3">💧 Water leak</button>
+          <button type="button" class="chip" data-sample="0">Blocked toilet</button>
+          <button type="button" class="chip" data-sample="1">Wi-Fi down</button>
+          <button type="button" class="chip" data-sample="2">Room locked</button>
+          <button type="button" class="chip" data-sample="3">Water leak</button>
         </div>
 
         <form id="report-form" novalidate>
@@ -65,7 +64,6 @@
 
       <section class="card hidden" id="done-card" aria-live="polite"></section>
 
-      <!-- Right: what happens next -->
       <aside class="stack">
         <div class="card">
           <h2 style="margin-bottom:16px">What happens next</h2>
@@ -76,7 +74,6 @@
           </ol>
         </div>
         <div class="callout">
-          <span>⚠️</span>
           <span><b>Leaks, sparks, smoke or a locked room?</b> These are marked urgent automatically and must be fixed within one hour.</span>
         </div>
       </aside>

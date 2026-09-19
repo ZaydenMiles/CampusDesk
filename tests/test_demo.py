@@ -1,4 +1,3 @@
-"""Demo mode: the whole portal works for anyone who clones the repo."""
 import pytest
 from fastapi.testclient import TestClient
 

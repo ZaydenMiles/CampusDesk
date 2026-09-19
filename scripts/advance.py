@@ -1,13 +1,3 @@
-"""Move a ticket along its lifecycle, as the department's agent would.
-
-    python -m scripts.advance 42                      # -> In Progress
-    python -m scripts.advance 42 --to Resolved
-    python -m scripts.advance 42 --walk               # In Progress, Resolved, Closed
-
-On stage, prefer clicking the status in the Freshdesk UI: it is more
-convincing. This script is the backup when the Wi-Fi to Freshdesk is slow
-and you need the webhook timeline to move.
-"""
 import argparse
 import sys
 import time

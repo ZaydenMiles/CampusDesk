@@ -1,15 +1,3 @@
-"""A pretend Freshdesk, so anyone can run CampusDesk without an account.
-
-    make demo            (or: DEMO_MODE=1 uvicorn app.main:app --port 8000)
-
-DemoFreshdesk has the same methods as FreshdeskClient, and it routes new
-tickets with app.categories.classify(), which is exactly what the real
-Freshdesk automation rules were configured to do. Deadlines follow the
-CampusDesk SLA policy. Everything lives in memory and resets on restart.
-
-The tests use it too (tests/conftest.py), so the demo and the tests can
-never disagree about how a report is routed.
-"""
 import itertools
 import json
 import threading
@@ -24,10 +12,8 @@ STATUSES = {2: "Open", 3: "Pending", 4: "Resolved", 5: "Closed",
             8: "Assigned", 9: "In Progress"}
 STATUS_ID = {v: k for k, v in STATUSES.items()}
 
-# CampusDesk SLA policy: resolve within N hours, by priority id.
 RESOLVE_HOURS = {4: 1, 3: 4, 2: 24, 1: 72}
 
-# What an agent does next, one click at a time.
 NEXT_STATUS = {"Open": "Assigned", "Assigned": "In Progress",
                "In Progress": "Resolved", "Resolved": "Closed"}
 
@@ -45,7 +31,6 @@ class DemoFreshdesk:
         self._ids = itertools.count(1001)
         self._lock = threading.Lock()
 
-    # ------------------------------------------------ same API as the client
     def create_ticket(self, *, name, email, subject, description,
                       location=None, tags=None) -> dict:
         c = categories.classify(subject, description)
@@ -74,7 +59,7 @@ class DemoFreshdesk:
         return self.tickets[ticket_id]
 
     def wait_for_routing(self, ticket_id, timeout, interval) -> dict:
-        return self.get_ticket(ticket_id)            # routing is instant here
+        return self.get_ticket(ticket_id)
 
     def update_ticket(self, ticket_id, **fields) -> dict:
         ticket = self.get_ticket(ticket_id)
@@ -101,9 +86,7 @@ class DemoFreshdesk:
     def status_id(self, name: str) -> int:
         return STATUS_ID[name]
 
-    # ------------------------------------------------------- demo helpers
     def advance(self, ticket_id: int) -> str | None:
-        """Play the department agent: move the ticket one step along."""
         current = STATUSES[self.get_ticket(ticket_id)["status"]]
         nxt = NEXT_STATUS.get(current)
         if nxt:
@@ -111,8 +94,6 @@ class DemoFreshdesk:
         return nxt
 
     def seed(self, store) -> None:
-        """Fill the helpdesk with the 12 sample reports, at different stages,
-        so the dashboard has something to show the moment it opens."""
         samples = json.loads(SAMPLES.read_text())
         for s in samples:
             created = self.create_ticket(
@@ -131,7 +112,6 @@ class DemoFreshdesk:
                 store.record(tid, status=status, priority=None, group_name=None,
                              agent="Demo agent", source="demo")
 
-        # One urgent hazard reported two hours ago and never fixed: escalated.
         leak = next(t for t in self.tickets.values() if t["subject"].startswith("Water leak"))
         two_hours_ago = datetime.now(timezone.utc) - timedelta(hours=2)
         leak.update(created_at=_iso(two_hours_ago),

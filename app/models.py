@@ -1,8 +1,3 @@
-"""Request and response shapes.
-
-Validation at the edge: an empty or absurd report is rejected with a 422
-before it costs an API call or lands in a department's queue.
-"""
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -46,11 +41,6 @@ class TicketView(BaseModel):
 
 
 class WebhookIn(BaseModel):
-    """What the Freshdesk "Trigger webhook" action sends us.
-
-    Everything except the id is optional: a placeholder that is empty in
-    Freshdesk (no agent yet) arrives as "" and must not break the receiver.
-    """
     ticket_id: int
     status: str | None = None
     priority: str | None = None

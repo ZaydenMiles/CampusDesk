@@ -1,15 +1,3 @@
-"""A small, honest client for the Freshdesk REST API v2.
-
-Only the calls this project needs. Two things it does that a naive
-`requests.post` would not:
-
-  * respects HTTP 429 (rate limit) by waiting for Retry-After, because a
-    Freshdesk trial allows only a few dozen API calls per minute
-  * turns every other error into one exception type with the response body,
-    so a typo in a field name tells you WHICH field instead of "400"
-
-Docs: https://developers.freshdesk.com/api/
-"""
 import time
 from typing import Callable, Iterator
 
@@ -36,7 +24,7 @@ class FreshdeskClient:
             raise ValueError("FRESHDESK_DOMAIN and FRESHDESK_API_KEY must be set")
         self._http = httpx.Client(
             base_url=f"https://{domain}.freshdesk.com/api/v2",
-            auth=(api_key, "X"),       # Freshdesk: API key as user, any password
+            auth=(api_key, "X"),
             timeout=15.0,
             transport=transport,
         )
@@ -45,7 +33,6 @@ class FreshdeskClient:
         self._groups: dict[int, str] | None = None
         self._statuses: dict[int, str] | None = None
 
-    # ------------------------------------------------------------------ core
     def _request(self, method: str, path: str, **kwargs):
         for attempt in range(self._max_retries + 1):
             resp = self._http.request(method, path, **kwargs)
@@ -62,15 +49,9 @@ class FreshdeskClient:
     def close(self) -> None:
         self._http.close()
 
-    # --------------------------------------------------------------- tickets
     def create_ticket(self, *, name: str, email: str, subject: str,
                       description: str, location: str | None = None,
                       tags: list[str] | None = None) -> dict:
-        """Create a ticket exactly as a student would, with NO category.
-
-        We deliberately do not send type, group or a raised priority:
-        deciding those is Freshdesk's job, and that is the point of the demo.
-        """
         body = {
             "name": name,
             "email": email,
@@ -98,11 +79,6 @@ class FreshdeskClient:
 
     def wait_for_routing(self, ticket_id: int, timeout: float,
                          interval: float) -> dict:
-        """Poll until the automation rules have set a group, or give up.
-
-        Creation rules normally run before the POST returns, but if they run
-        a moment later the portal still reports the real department.
-        """
         deadline = time.monotonic() + timeout
         while True:
             ticket = self.get_ticket(ticket_id)
@@ -111,7 +87,6 @@ class FreshdeskClient:
             self._sleep(interval)
 
     def list_tickets(self, max_pages: int = 5) -> Iterator[dict]:
-        """Tickets from the last 30 days (Freshdesk's default window)."""
         for page in range(1, max_pages + 1):
             batch = self._request("GET", "/tickets", params={
                 "per_page": 100, "page": page, "include": "stats",
@@ -121,7 +96,6 @@ class FreshdeskClient:
             if len(batch) < 100:
                 return
 
-    # ------------------------------------------------------------ lookups
     def me(self) -> dict:
         return self._request("GET", "/agents/me")
 
@@ -135,11 +109,6 @@ class FreshdeskClient:
         return self._groups
 
     def statuses(self, refresh: bool = False) -> dict[int, str]:
-        """Status id -> agent-facing name, including your custom statuses.
-
-        Custom statuses get ids assigned by Freshdesk (not 6 and 7 on every
-        account), so they are looked up rather than hard-coded.
-        """
         if self._statuses is None or refresh:
             self._statuses = parse_statuses(self.ticket_fields())
         return self._statuses
@@ -154,7 +123,6 @@ class FreshdeskClient:
 def parse_statuses(fields: list[dict]) -> dict[int, str]:
     for field in fields:
         if field.get("name") == "status":
-            # {"2": ["Open", "Being Processed"], ...}  agent label first
             return {int(k): (v[0] if isinstance(v, list) else v)
                     for k, v in field["choices"].items()}
     raise FreshdeskError(500, "ticket_fields has no status field")

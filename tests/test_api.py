@@ -1,6 +1,3 @@
-"""The portal API, with FakeFreshdesk standing in for the helpdesk."""
-
-
 def test_report_is_routed_by_freshdesk(client, report):
     r = client.post("/api/reports", json=report)
     assert r.status_code == 201
@@ -34,7 +31,6 @@ def test_tracking_needs_the_matching_email(client, report):
     assert ok.status_code == 200 and ok.json()["status"] == "Assigned"
     stranger = client.post(f"/api/reports/{tid}/track", json={"email": "other@example.com"})
     missing = client.post("/api/reports/999999/track", json={"email": "student@example.com"})
-    # identical answers: a stranger cannot learn that the ticket exists
     assert stranger.status_code == missing.status_code == 404
     assert stranger.json() == missing.json()
 

@@ -1,10 +1,3 @@
-"""The local status history, fed by Freshdesk webhooks.
-
-Freshdesk stores the ticket; this stores the JOURNEY, one row per change,
-so the tracking page can show Open -> Assigned -> In Progress -> Resolved
-with a timestamp on each step. SQLite from the standard library: one file,
-nothing to install.
-"""
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -18,7 +11,7 @@ CREATE TABLE IF NOT EXISTS ticket_events (
     priority     TEXT,
     group_name   TEXT,
     agent        TEXT,
-    source       TEXT NOT NULL,          -- 'portal' or 'webhook'
+    source       TEXT NOT NULL,
     received_at  TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ticket_events_ticket_idx
@@ -38,8 +31,6 @@ class EventStore:
 
     @contextmanager
     def _conn(self):
-        # A fresh connection per call keeps this safe across FastAPI's
-        # worker threads. (":memory:" keeps one, or the tests lose the table.)
         conn = self._memory or sqlite3.connect(self.path)
         conn.row_factory = sqlite3.Row
         try:

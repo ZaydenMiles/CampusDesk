@@ -1,23 +1,3 @@
-"""Configure a Freshdesk helpdesk for CampusDesk through the admin API.
-
-    python -m scripts.setup_freshdesk
-    python -m scripts.setup_freshdesk --webhook-url https://abc.trycloudflare.com
-
-What it sets up (everything is found by NAME, so it is safe to run again:
-existing items are left alone and only missing ones are created):
-
-  1. groups          Maintenance, Security, IT Support, Service Desk
-  2. ticket types    Maintenance, IT, Security, General
-  3. statuses        Assigned, In Progress   (SLA timer keeps running)
-  4. custom field    Location (cf_location)
-  5. creation rules  Route Maintenance / Security / IT, fallback, urgent
-  6. SLA policy      CampusDesk SLA: urgent = respond 15 min, resolve 1 h, 24/7
-  7. hourly trigger  escalate urgent reports unresolved after 2 hours
-  8. webhook rule    status changed -> POST to the portal (with --webhook-url)
-
-One setting has no API and must be clicked once:
-  Admin -> Automations -> Ticket Creation -> "Execute all matching rules".
-"""
 import argparse
 import sys
 
@@ -25,7 +5,7 @@ from app import categories as c
 from app import config
 from app.freshdesk import FreshdeskClient, FreshdeskError, from_env
 
-CREATION, HOURLY, UPDATES = 1, 3, 4           # Freshdesk automation type ids
+CREATION, HOURLY, UPDATES = 1, 3, 4
 WEBHOOK_RULE = "Push status to portal"
 SLA_NAME = "CampusDesk SLA"
 H = 3600
@@ -38,9 +18,6 @@ GROUP_DESCRIPTIONS = {
 }
 
 
-# --------------------------------------------------------------------------
-# Payload builders: pure functions, so tests can check them without an API
-# --------------------------------------------------------------------------
 def _contains(op: str, words) -> list[dict]:
     return [{"name": "condition_set_1", "match_type": "all", "properties": [
         {"resource_type": "ticket", "field_name": "subject_or_description",
@@ -48,7 +25,6 @@ def _contains(op: str, words) -> list[dict]:
 
 
 def creation_rules(group_ids: dict[str, int], assigned_status: int) -> list[dict]:
-    """The five ticket creation rules, in the order they must run."""
     rules = [{
         "name": f"Route {cat.ticket_type}", "active": True,
         "conditions": _contains("contains", cat.keywords),
@@ -82,10 +58,10 @@ def sla_policy(group_ids: list[int], escalate_to: int) -> dict:
                        "Missed targets escalate to the service desk lead.",
         "applicable_to": {"group_ids": group_ids},
         "sla_target": {
-            "priority_4": target(15 * 60, 1 * H, False),   # Urgent, calendar hours
-            "priority_3": target(1 * H, 4 * H, False),     # High
-            "priority_2": target(4 * H, 24 * H, True),     # Medium, business hours
-            "priority_1": target(24 * H, 72 * H, True),    # Low
+            "priority_4": target(15 * 60, 1 * H, False),
+            "priority_3": target(1 * H, 4 * H, False),
+            "priority_2": target(4 * H, 24 * H, True),
+            "priority_1": target(24 * H, 72 * H, True),
         },
         "escalation": {
             "response": {"escalation_time": 0, "agent_ids": [escalate_to]},
@@ -95,9 +71,6 @@ def sla_policy(group_ids: list[int], escalate_to: int) -> dict:
 
 
 def escalation_rule(escalate_to: int) -> dict:
-    # Hourly triggers re-check every ticket every hour, and they cannot test
-    # tags, so "older than 2 hours" alone would email again every hour until
-    # the ticket is fixed. The 2-3 hour window makes it fire exactly once.
     return {
         "name": "Escalate stale urgent reports", "active": True,
         "conditions": [{"name": "condition_set_1", "match_type": "all", "properties": [
@@ -136,7 +109,7 @@ def webhook_action(base_url: str, secret: str) -> dict:
 def webhook_rule(base_url: str, secret: str) -> dict:
     return {
         "name": WEBHOOK_RULE, "active": True,
-        "performer": {"type": 3},                      # agent or requester
+        "performer": {"type": 3},
         "events": [{"field_name": "status", "from": "--", "to": "--"}],
         "conditions": [{"name": "condition_set_1", "match_type": "all", "properties": [
             {"resource_type": "ticket", "field_name": "priority", "operator": "in",
@@ -145,9 +118,6 @@ def webhook_rule(base_url: str, secret: str) -> dict:
     }
 
 
-# --------------------------------------------------------------------------
-# Steps against the real API
-# --------------------------------------------------------------------------
 def say(done: bool, text: str) -> None:
     print(f"  {'exists ' if done else 'created'}  {text}")
 
@@ -219,7 +189,6 @@ def ensure_sla(fd: FreshdeskClient, group_ids: list[int], escalate_to: int) -> N
     body = sla_policy(group_ids, escalate_to)
     existing = [p for p in fd._request("GET", "/sla_policies") if p["name"] == SLA_NAME]
     if existing:
-        # "active": True also switches back on a policy someone deactivated.
         fd._request("PUT", f"/sla_policies/{existing[0]['id']}",
                     json={**{k: v for k, v in body.items() if k != "name"}, "active": True})
     else:
@@ -228,8 +197,6 @@ def ensure_sla(fd: FreshdeskClient, group_ids: list[int], escalate_to: int) -> N
 
 
 def set_webhook(fd: FreshdeskClient, base_url: str) -> None:
-    """Point the status-change webhook at base_url, creating the rule if needed.
-    Called by scripts/tunnel.py every time the tunnel gets a new address."""
     if not config.WEBHOOK_SECRET:
         raise SystemExit("WEBHOOK_SECRET is empty in .env")
     rules = {r["name"]: r for r in fd._request("GET", f"/automations/{UPDATES}/rules")}
@@ -243,7 +210,7 @@ def set_webhook(fd: FreshdeskClient, base_url: str) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description="Configure a Freshdesk helpdesk for CampusDesk through the admin API.")
     ap.add_argument("--webhook-url", help="public base URL of the portal, e.g. from make tunnel")
     args = ap.parse_args()
     try:

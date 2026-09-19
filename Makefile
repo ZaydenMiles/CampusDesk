@@ -1,4 +1,3 @@
-# Short names for every command. `make help` lists them.
 .DEFAULT_GOAL := help
 PY := .venv/bin/python
 

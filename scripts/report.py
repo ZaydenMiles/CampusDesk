@@ -1,10 +1,3 @@
-"""The numbers for the results slide, straight from Freshdesk.
-
-    python -m scripts.report
-
-Tickets from the last 30 days, grouped by department, status and priority,
-plus how many breached their SLA and how long resolution took.
-"""
 from collections import Counter
 from datetime import datetime, timezone
 from statistics import median
