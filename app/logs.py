@@ -14,7 +14,7 @@ def setup(name: str) -> logging.Logger:
             format="%(asctime)s  %(name)-10s  %(message)s",
             datefmt="%H:%M:%S",
         )
-        # httpx logs every request at INFO, which buries our own lines.
+
         logging.getLogger("httpx").setLevel(logging.WARNING)
         _CONFIGURED = True
     return logging.getLogger(name)

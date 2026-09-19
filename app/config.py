@@ -1,7 +1,4 @@
 """Central configuration.
-
-Every setting comes from the environment (or .env) so the API key never
-appears in code and the same code runs on your laptop and in CI.
 """
 import os
 
@@ -27,10 +24,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 ROUTING_TIMEOUT = float(os.getenv("ROUTING_TIMEOUT", "8"))
 ROUTING_POLL = float(os.getenv("ROUTING_POLL", "0.5"))
 
-# --------------------------------------------------------------------------
-# Names that must match what you create in the Freshdesk admin UI exactly.
-# scripts/check_setup.py compares these against your real helpdesk.
-# --------------------------------------------------------------------------
+
 GROUPS = ["Maintenance", "IT Support", "Security", "Service Desk"]
 TICKET_TYPES = ["Maintenance", "IT", "Security", "General"]
 CUSTOM_STATUSES = ["Assigned", "In Progress"]
