@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    actor S as Student
+    participant P as Service portal
+    participant F as Freshdesk API
+    participant R as Automation rules
+    actor A as Maintenance agent
+
+    S->>P: Submit "Toilet blocked on 3rd floor"
+    P->>F: POST /api/v2/tickets (no type, no group)
+    F->>R: Ticket creation rules run
+    R-->>F: Type=Maintenance, Group=Maintenance, Status=Assigned
+    F-->>P: 201 {id: 42}
+    P->>F: GET /tickets/42
+    F-->>P: group, type, priority, status
+    P-->>S: Ticket 42 · Maintenance · Assigned (routed in about 1 s)
+    F-->>A: Email: new ticket in your group
+    A->>F: Set status In Progress
+    F->>P: Webhook {ticket_id: 42, status: In Progress}
+    F-->>S: Email: your report is In Progress
+    A->>F: Set status Resolved
+    F->>P: Webhook {status: Resolved}
+    S->>P: Track ticket 42
+    P-->>S: Open → Assigned → In Progress → Resolved

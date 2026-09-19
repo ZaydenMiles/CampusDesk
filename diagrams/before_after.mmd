@@ -1,0 +1,22 @@
+flowchart LR
+    subgraph BEFORE["Before: manual triage"]
+        direction TB
+        S1[Student / staff report] --> I1[Shared inbox]
+        I1 --> R1{Staff member reads<br/>every report}
+        R1 -->|guess| M1[Maintenance]
+        R1 -->|guess| SE1[Security]
+        R1 -->|guess| IT1[IT]
+        R1 -.->|wrong dept / forgotten| X1[Delay, duplicate work,<br/>urgent issue missed]
+    end
+    subgraph AFTER["After: Freshdesk automation"]
+        direction TB
+        S2[Student / staff report] --> P2[Service portal]
+        P2 -->|REST API| T2[Freshdesk ticket]
+        T2 --> A2{Ticket creation rules<br/>keywords}
+        A2 --> M2[Maintenance group]
+        A2 --> SE2[Security group]
+        A2 --> IT2[IT Support group]
+        A2 -->|no match| SD2[Service Desk triage]
+        T2 --> SLA2[SLA policy:<br/>urgent = escalate if late]
+    end
+    BEFORE ~~~ AFTER

@@ -1,0 +1,29 @@
+flowchart LR
+    student([Student / staff]) -->|1 submit report| portal
+    student -->|track status| portal
+
+    subgraph LAPTOP["Our code (FastAPI, GitHub repo)"]
+        portal[CampusDesk portal<br/>app/main.py]
+        db[(events.db<br/>SQLite timeline)]
+        portal --- db
+    end
+
+    subgraph FD["Freshdesk (SaaS)"]
+        api[REST API v2]
+        rules[Ticket creation rules<br/>categorise + assign]
+        groups[Groups<br/>Maintenance / Security / IT Support / Service Desk]
+        sla[SLA policy +<br/>hourly triggers]
+        upd[Ticket update rules<br/>status changed]
+        analytics[Analytics / reports]
+        api --> rules --> groups
+        groups --> sla
+        groups --> upd
+        groups --> analytics
+    end
+
+    portal -->|2 POST /tickets| api
+    portal -->|3 GET /tickets/id| api
+    agents([Department agents]) -->|4 change status| groups
+    upd -->|5 webhook POST<br/>via HTTPS tunnel| portal
+    upd -->|email| student
+    sla -.->|escalation email| lead([Service desk lead])

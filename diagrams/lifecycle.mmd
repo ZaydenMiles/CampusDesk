@@ -1,0 +1,14 @@
+stateDiagram-v2
+    [*] --> Open: report submitted
+    Open --> Assigned: creation rule matched type and group set
+    Open --> Assigned: Service Desk triages manually
+    Assigned --> InProgress: agent starts work
+    InProgress --> Resolved: agent fixes it
+    Resolved --> Closed: 48 h later (hourly trigger)
+    Resolved --> InProgress: student says not fixed
+    Assigned --> Escalated: SLA target missed
+    InProgress --> Escalated: SLA target missed
+    Escalated --> InProgress: lead intervenes
+    Closed --> [*]
+    state "In Progress" as InProgress
+    state "Escalated (flag, not a status)" as Escalated
