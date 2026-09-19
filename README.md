@@ -119,11 +119,33 @@ Tests need no account either: `make test`.
 | `python -m scripts.advance ID --walk` | Moves a ticket In Progress → Resolved → Closed |
 | `make test` | All tests |
 
+## Deploy on a server
+
+The same code runs on a Linux server behind nginx with HTTPS (tested on an Azure Ubuntu 24.04 VM). After the install step, copy your `.env` into the folder (never commit it):
+
+```bash
+git clone https://github.com/ZaydenMiles/CampusDesk.git ~/campusdesk && cd ~/campusdesk
+sudo apt-get install -y python3.12-venv
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+sudo cp deploy/campusdesk.service /etc/systemd/system/ && sudo systemctl enable --now campusdesk
+sed "s/YOUR_HOSTNAME/your.domain/" deploy/nginx-campusdesk.conf | sudo tee /etc/nginx/sites-enabled/campusdesk
+sudo nginx -t && sudo systemctl reload nginx
+python -m scripts.setup_freshdesk --webhook-url https://your.domain:8443
+```
+
+| Piece | Role |
+|---|---|
+| `deploy/campusdesk.service` | systemd runs the app on `127.0.0.1:8001` and restarts it if it stops or the server reboots |
+| `deploy/nginx-campusdesk.conf` | nginx serves it over HTTPS on port 8443 (reusing a Let's Encrypt certificate) and forwards to the app |
+| Firewall | Allow TCP 8443 in the cloud firewall and on the server |
+| Freshdesk | The webhook points at the server's fixed address, so no tunnel is needed |
+
 ## Honest limits
 
 - Keyword rules are not understanding: typos and unusual wording fall through to the Service Desk.
 - A report that mentions two problems goes to one department (the last matching rule).
 - Only English keywords; Thai-language reports currently fall back to manual triage.
 - If Freshdesk is unreachable the portal returns an error instead of queueing the report.
+- The deployment is a single VM without a load balancer or managed database.
 - Hourly triggers run once an hour, so time-based escalation is not instant.
 - Student data lives in a third-party SaaS, which a real university would need to assess under PDPA.
