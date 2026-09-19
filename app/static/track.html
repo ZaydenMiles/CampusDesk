@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Track a report · CampusDesk</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="/"><span class="logo-mark">🎓</span><span class="logo-text">CampusDesk</span></a>
+      <nav class="nav">
+        <a href="/">Report a problem</a>
+        <a href="/track">Track a report</a>
+        <a href="/dashboard">Staff dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <h1>Track a report</h1>
+      <p class="muted">Enter your report number and the email you used. The status updates by itself while this page is open.</p>
+    </div>
+
+    <div class="grid-2">
+      <section class="stack">
+        <div class="card" id="result-card" aria-live="polite">
+          <div class="empty">Your report will appear here.</div>
+        </div>
+      </section>
+
+      <aside class="stack">
+        <form class="card" id="track-form">
+          <h2 style="margin-bottom:14px">Find your report</h2>
+          <div class="field">
+            <label for="ticket">Report number</label>
+            <input id="ticket" name="ticket" inputmode="numeric" placeholder="e.g. 42" required>
+          </div>
+          <div class="field">
+            <label for="email">Email you reported with</label>
+            <input id="email" name="email" type="email" required>
+          </div>
+          <button class="btn btn-primary btn-block" id="find" type="submit">Show my report</button>
+        </form>
+        <div class="callout info">
+          <span>🔒</span>
+          <span>Only someone who knows both the number <b>and</b> the email can see a report.</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script type="module" src="/static/track.js"></script>
+</body>
+</html>

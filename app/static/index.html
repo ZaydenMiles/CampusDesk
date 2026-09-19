@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Report a problem · CampusDesk</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="/"><span class="logo-mark">🎓</span><span class="logo-text">CampusDesk</span></a>
+      <nav class="nav">
+        <a href="/">Report a problem</a>
+        <a href="/track">Track a report</a>
+        <a href="/dashboard">Staff dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <h1>Report a campus problem</h1>
+      <p class="muted">Tell us what's wrong. You don't need to know which department handles it: we route it automatically.</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Left: the form, replaced by a confirmation card after submitting -->
+      <section class="card" id="form-card">
+        <div class="chips" aria-label="Examples">
+          <span class="muted small" style="align-self:center">Try an example:</span>
+          <button type="button" class="chip" data-sample="0">🚽 Blocked toilet</button>
+          <button type="button" class="chip" data-sample="1">📶 Wi-Fi down</button>
+          <button type="button" class="chip" data-sample="2">🔒 Room locked</button>
+          <button type="button" class="chip" data-sample="3">💧 Water leak</button>
+        </div>
+
+        <form id="report-form" novalidate>
+          <div class="field-row">
+            <div class="field" data-field="name">
+              <label for="name">Your name</label>
+              <input id="name" name="name" autocomplete="name" required>
+            </div>
+            <div class="field" data-field="email">
+              <label for="email">University email <span class="hint">· to track your report</span></label>
+              <input id="email" name="email" type="email" autocomplete="email" required>
+            </div>
+          </div>
+          <div class="field" data-field="location">
+            <label for="location">Where is the problem?</label>
+            <input id="location" name="location" placeholder="e.g. VMS Building, 3rd floor restroom" required>
+          </div>
+          <div class="field" data-field="subject">
+            <label for="subject">What's wrong, in a few words?</label>
+            <input id="subject" name="subject" placeholder="e.g. Toilet blocked" required>
+          </div>
+          <div class="field" data-field="description">
+            <label for="description">Details <span class="counter" id="counter">0 / 5000</span></label>
+            <textarea id="description" name="description" maxlength="5000"
+              placeholder="What happened, since when, anything we should know…" required></textarea>
+          </div>
+          <button class="btn btn-primary btn-block" id="submit" type="submit">Submit report</button>
+        </form>
+      </section>
+
+      <section class="card hidden" id="done-card" aria-live="polite"></section>
+
+      <!-- Right: what happens next -->
+      <aside class="stack">
+        <div class="card">
+          <h2 style="margin-bottom:16px">What happens next</h2>
+          <ol class="steps">
+            <li><b>We read it automatically</b><span class="muted small">Freshdesk sorts it: Maintenance, Security or IT.</span></li>
+            <li><b>The right team gets it</b><span class="muted small">Assigned straight to that department, day or night.</span></li>
+            <li><b>You follow the progress</b><span class="muted small">Open → Assigned → In Progress → Resolved.</span></li>
+          </ol>
+        </div>
+        <div class="callout">
+          <span>⚠️</span>
+          <span><b>Leaks, sparks, smoke or a locked room?</b> These are marked urgent automatically and must be fixed within one hour.</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script type="module" src="/static/report.js"></script>
+</body>
+</html>

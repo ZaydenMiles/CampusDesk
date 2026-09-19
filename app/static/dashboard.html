@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Staff dashboard · CampusDesk</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="/"><span class="logo-mark">🎓</span><span class="logo-text">CampusDesk</span></a>
+      <nav class="nav">
+        <a href="/">Report a problem</a>
+        <a href="/track">Track a report</a>
+        <a href="/dashboard">Staff dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head card-head">
+      <div>
+        <h1>Staff dashboard</h1>
+        <p class="muted" id="source">Live from Freshdesk · last 30 days</p>
+      </div>
+      <div class="actions">
+        <span class="muted small" id="updated" style="align-self:center"></span>
+        <button class="btn btn-ghost" id="refresh" type="button">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="grid-kpi">
+      <div class="card kpi"><div class="muted small">Reports</div><div class="value" id="kpi-total">–</div></div>
+      <div class="card kpi"><div class="muted small">Still open</div><div class="value" id="kpi-open">–</div></div>
+      <div class="card kpi"><div class="muted small">Urgent and open</div><div class="value" id="kpi-urgent">–</div></div>
+      <div class="card kpi" id="kpi-overdue-card"><div class="muted small">Overdue / escalated</div><div class="value" id="kpi-overdue">–</div></div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card"><h2 style="margin-bottom:16px">By department</h2><ul class="bars" id="by-department"></ul></div>
+      <div class="card"><h2 style="margin-bottom:16px">By status</h2><ul class="bars" id="by-status"></ul></div>
+      <div class="card"><h2 style="margin-bottom:16px">By priority</h2><ul class="bars" id="by-priority"></ul></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><h2>🚨&nbsp; Overdue or escalated</h2></div>
+      <table id="overdue"></table>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><h2>Latest reports</h2></div>
+      <table id="recent"></table>
+    </div>
+  </main>
+
+  <script type="module" src="/static/dashboard.js"></script>
+</body>
+</html>
