@@ -2,8 +2,6 @@
 
 *One place to report any campus problem.*
 
-![CI](https://github.com/ZaydenMiles/CampusDesk/actions/workflows/ci.yml/badge.svg)
-
 CSX4110 Backend Development · Project 02 
 
 | Member | Student ID |
@@ -65,8 +63,8 @@ flowchart LR
 
 | | Before (manual triage) | After (Freshdesk rules) |
 |---|---|---|
-| Time from report to correct department | _to measure: step 21_ s per ticket, office hours only | **1.9 s** median (1.4–2.7 s), day or night |
-| Correctly routed, 12 sample reports | _to measure: step 21_ / 12 | **12 / 12** (`scripts/verify_routing.py`, real Freshdesk, 19 Sep 2026) |
+| Time from report to correct department | not measured yet (seconds per ticket), office hours only | **1.9 s** median (1.4–2.7 s), day or night |
+| Correctly routed, 12 sample reports | not measured yet | **12 / 12** (`scripts/verify_routing.py`, real Freshdesk, 19 Sep 2026) |
 | Reporter can see status | no | yes: timeline updated by webhook about 1 s after each change |
 | Urgent hazards flagged | when someone notices | automatically: respond in 15 min, fix in 1 h, 24/7, escalated if missed |
 
