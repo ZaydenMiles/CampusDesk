@@ -114,6 +114,7 @@ Tests need no account either: `make test`.
 | `make check` | Compares your Freshdesk setup with what the code expects |
 | `make verify` | Creates 12 sample reports and checks each was routed correctly |
 | `make report` | Counts by department / status / priority, SLA breaches |
+| `make present` | Step-by-step terminal walkthrough of the whole flow |
 | `python -m scripts.advance ID --walk` | Moves a ticket In Progress → Resolved → Closed |
 | `make test` | All tests |
 

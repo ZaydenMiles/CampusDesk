@@ -19,6 +19,8 @@ verify:    ## create the 12 sample tickets and check every one was routed correc
 	$(PY) -m scripts.verify_routing
 report:    ## the numbers for the results slide
 	$(PY) -m scripts.report
+present:   ## step-by-step terminal demo (SITE=https://... to use the deployed server)
+	bash scripts/demo.sh
 test:      ## all tests (no Freshdesk needed)
 	$(PY) -m pytest -v
 health:    ## one line: can I present?
@@ -28,4 +30,4 @@ reset:     ## wipe the local webhook timeline
 help:      ## this list
 	@grep -E "^[a-z-]+:.*## " Makefile | sed -E "s/:.*## /\t/"
 
-.PHONY: install demo run tunnel setup check rules verify report test health reset help
+.PHONY: install demo run tunnel setup check rules verify report present test health reset help
